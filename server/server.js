@@ -35,6 +35,27 @@ io.on("connection", (socket) => {
         io.to(socket.id).emit("room_join_success", { email, room, allUsers: allUsersInRoom });
     });
 
+    socket.on("user_call", ({ to, offer }) => {
+        io.to(to[0].id).emit("incomming_call", { from: socket.id, offer })
+    })
+
+    socket.on("user_answer", ({ from, answer }) => {
+        // console.log("user_answer", { from, answer });
+        io.to(from).emit("user_answer_resp", { from: socket.id, answer })
+    })
+
+    socket.on("peer_nego_needed", ({ to, offer }) => {
+        // console.log("peer_nego_needed", {to:to[0].id, offer});
+        io.to(to[0].id).emit("peer_nego_needed", { from: socket.id, offer })
+    })
+
+    socket.on("peer_nego_needed_answer", ({ to, answer }) => {
+        // console.log("peer_nego_needed_answer", {to, answer});
+        io.to(to).emit("peer_nego_needed_final", {
+            from: socket.id, answer
+        })
+    })
+
     socket.on("disconnect", () => {
         // Handle user disconnect and remove them from the room's user list
         roomUser.forEach((users, room) => {
